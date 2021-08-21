@@ -1,14 +1,27 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import * as Linking from 'expo-linking';
+import { StatusBar } from 'expo-status-bar';
 
-export default function AboutPage() {
+export default function AboutPage({navigation,route}) {
+    useEffect(()=>{
+        navigation.setOptions({
+            title:"소개 페이지",
+            headerStyle: {
+                backgroundColor: "#272C70",
+                shadowColor: "#272C70",
+            },
+            headerTintColor: "#fff",
+        })
+    },[])
+
     const link = () => {
         Linking.openURL("https://velog.io/@jiyeah3108")
     }
 
     return(
         <View style={styles.container}>
+            <StatusBar style="light"/>
             <Text style={styles.title}>HI! 람지의 벨로그에 오신 것을 환영합니다! :) </Text>
             <View style={styles.subContainer}>
                 <Image style={styles.profileImage} source={{uri:"https://firebasestorage.googleapis.com/v0/b/sparta-image.appspot.com/o/lecture%2FaboutImage.png?alt=media&token=13e1c4f6-b802-4975-9773-e305fc7475c4"}}/>
@@ -29,7 +42,7 @@ const styles = StyleSheet.create({
         fontSize: 35,
         fontWeight: "bold",
         color: "#fff",
-        marginTop: 80,
+        marginTop: 35,
         marginHorizontal: 20,
         textAlign: "center"
     },
