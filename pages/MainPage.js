@@ -1,6 +1,6 @@
 import React,{useState,useEffect} from 'react';
 import main from '../assets/main.png';
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView} from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Platform} from 'react-native';
 import data from '../data.json';
 import Card from '../components/Card';
 import Loading from '../components/Loading';
@@ -8,6 +8,14 @@ import { StatusBar } from 'expo-status-bar';
 import * as Location from "expo-location";
 import axios from "axios"
 import {firebase_db} from "../firebaseConfig"
+
+import {
+  setTestDeviceIDAsync,
+  AdMobBanner,
+  AdMobInterstitial,
+  PublisherBanner,
+  AdMobRewarded
+} from 'expo-ads-admob';
 
 export default function MainPage({navigation,route}) {
   console.disableYellowBox = true;
@@ -38,7 +46,6 @@ export default function MainPage({navigation,route}) {
         navigation.setOptions({
             title:'나만의 꿀팁'
         })
-
         firebase_db.ref('/tip').once('value').then((snapshot) => {
           console.log("파이어베이스에서 데이터 가져왔습니다!!")
           let tip = snapshot.val();
@@ -47,7 +54,6 @@ export default function MainPage({navigation,route}) {
           getLocation()
           setReady(false)
         });
-
         // setTimeout(()=>{
         //     let tip = data.tip;
         //     setState(tip)
@@ -86,6 +92,7 @@ export default function MainPage({navigation,route}) {
         temp,condition
       })
 
+
     } catch (error) {
       //혹시나 위치를 못가져올 경우를 대비해서, 안내를 준비합니다
       Alert.alert("위치를 찾을 수가 없습니다.", "앱을 껏다 켜볼까요?");
@@ -104,7 +111,7 @@ export default function MainPage({navigation,route}) {
     }
 
 
-	//실제 데이터를 넣을 예정이므로 주석!
+  //실제 데이터를 넣을 예정이므로 주석!
 	// let todayWeather = 10 + 17;
   // let todayCondition = "흐림"
 
@@ -118,11 +125,11 @@ export default function MainPage({navigation,route}) {
         <StatusBar style="black" />
         {/* <Text style={styles.title}>나만의 꿀팁</Text> */}
         <Text style={styles.weather}>오늘의 날씨: {weather.temp + '°C   ' + weather.condition} </Text>
-        <TouchableOpacity style={styles.introduceButton} onPress={()=>{navigation.navigate('AboutPage')}}>
-          <Text style={styles.introduceText}>소개 페이지</Text>
+        <TouchableOpacity style={styles.aboutButton} onPress={()=>{navigation.navigate('AboutPage')}}>
+          <Text style={styles.aboutButtonText}>소개 페이지</Text>
         </TouchableOpacity>
         <Image style={styles.mainImage} source={main}/>
-        <ScrollView style={styles.middleContainer} horizontal showsHorizontalScrollIndicator={false}>
+        <ScrollView style={styles.middleContainer} horizontal indicatorStyle={"white"}>
             <TouchableOpacity style={styles.middleButtonAll} onPress={()=>{category('전체보기')}}><Text style={styles.middleButtonTextAll}>전체보기</Text></TouchableOpacity>
             <TouchableOpacity style={styles.middleButton01} onPress={()=>{category('생활')}}><Text style={styles.middleButtonText}>생활</Text></TouchableOpacity>
             <TouchableOpacity style={styles.middleButton02} onPress={()=>{category('재테크')}}><Text style={styles.middleButtonText}>재테크</Text></TouchableOpacity>
@@ -136,7 +143,21 @@ export default function MainPage({navigation,route}) {
                 return (<Card content={content} key={i} navigation={navigation}/>)
             })
             }
-            
+            {Platform.OS === 'ios' ? (
+                <AdMobBanner
+                  bannerSize="fullBanner"
+                  servePersonalizedAds={true}
+                  adUnitID="ca-app-pub-7347381509970965/3946949563"
+                  style={styles.banner}
+                />
+            ) : (
+                <AdMobBanner
+                  bannerSize="fullBanner"
+                  servePersonalizedAds={true}
+                  adUnitID="ca-app-pub-7347381509970965/2134980927"
+                  style={styles.banner}
+                />
+            )}
         </View>
     </ScrollView>
   );
@@ -157,25 +178,9 @@ const styles = StyleSheet.create({
     //왼쪽 공간으로 부터 이격
     marginLeft:20
   },
-  weather:{
+weather:{
     alignSelf:"flex-end",
     paddingRight:20
-  },
-  introduceButton:{
-    width:100,
-    height:40,
-    padding:2,
-    backgroundColor:"pink",
-    borderRadius:10,
-    alignSelf:"flex-end",
-    marginRight:20,
-    marginTop:10
-  },
-  introduceText:{
-    color:"#fff",
-    textAlign:"center",
-    marginTop:10,
-    fontWeight:"700"
   },
   mainImage: {
     //컨텐츠의 넓이 값
@@ -197,7 +202,7 @@ const styles = StyleSheet.create({
   middleButtonAll: {
     width:100,
     height:50,
-    padding:18,
+    padding:15,
     backgroundColor:"#20b2aa",
     borderColor:"deeppink",
     borderRadius:15,
@@ -206,7 +211,7 @@ const styles = StyleSheet.create({
   middleButton01: {
     width:100,
     height:50,
-    padding:18,
+    padding:15,
     backgroundColor:"#fdc453",
     borderColor:"deeppink",
     borderRadius:15,
@@ -215,7 +220,7 @@ const styles = StyleSheet.create({
   middleButton02: {
     width:100,
     height:50,
-    padding:18,
+    padding:15,
     backgroundColor:"#fe8d6f",
     borderRadius:15,
     margin:7
@@ -223,7 +228,7 @@ const styles = StyleSheet.create({
   middleButton03: {
     width:100,
     height:50,
-    padding:18,
+    padding:15,
     backgroundColor:"#9adbc5",
     borderRadius:15,
     margin:7
@@ -231,7 +236,7 @@ const styles = StyleSheet.create({
   middleButton04: {
     width:100,
     height:50,
-    padding:18,
+    padding:15,
     backgroundColor:"#f886a8",
     borderRadius:15,
     margin:7
@@ -252,6 +257,20 @@ const styles = StyleSheet.create({
     marginTop:10,
     marginLeft:10
   },
+  aboutButton: {
+    backgroundColor:"pink",
+    width:100,
+    height:40,
+    borderRadius:10,
+    alignSelf:"flex-end",
+    marginRight:20,
+    marginTop:10
+  },
+  aboutButtonText: {
+    color:"#fff",
+    textAlign:"center",
+    marginTop:10
+  }
 
 
 });
